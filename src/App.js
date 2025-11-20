@@ -16,6 +16,8 @@ export default function TestLayout() {
   const [isConnected, setIsConnected] = useState(false);
   const [ws, setWs] = useState(null);
   const [connectivity, setConnectivity] = useState('MQTT');
+  const [deviceId, setDeviceId] = useState('');
+  const [devices, setDevices] = useState([]);
 
 
 
@@ -26,6 +28,11 @@ export default function TestLayout() {
           const response = await fetch('http://snackboss-iot.in:8080/mqtt/getAllMacAddress');
           const data = await response.json();
           console.log('Fetched MAC addresses:', data);
+          const onlineDevices = data.data.filter(device => device.lastHeartBeatTime && (Date.now() - new Date(device.lastHeartBeatTime).getTime()) < 5 * 60 * 1000); // Online if heartbeat within 5 minutes
+          setDevices(onlineDevices);
+          if (onlineDevices.length > 0) {
+            setDeviceId(onlineDevices[0].SNoutput);
+          }
         } catch (error) {
           console.error('Error fetching MAC addresses:', error);
         }
@@ -103,7 +110,7 @@ export default function TestLayout() {
       <div className="row-3">
         <div className="input-group">
           <label>Connectivity</label>
-          <select>
+          <select value={connectivity} onChange={(e)=>setConnectivity(e.target.value)}>
             <option value="MQTT">MQTT</option>
             <option value="TCP">TCP</option>
             <option value="UART">UART</option>
@@ -113,7 +120,11 @@ export default function TestLayout() {
 
         <div className="input-group">
           <label>Device ID (Only if server)</label>
-          <input type="text" placeholder="Enter Device ID" />
+          <select value={deviceId} onChange={(e) => setDeviceId(e.target.value)}>
+            {devices.map((device, index) => (
+              <option key={index} value={device.SNoutput}>{device.SNoutput}</option>
+            ))}
+          </select>
         </div>
 
         <div className="input-group">
