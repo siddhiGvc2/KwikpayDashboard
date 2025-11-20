@@ -3,13 +3,19 @@ import "./App.css";
 
 export default function TestLayout() {
   const [tableRows, setTableRows] = useState([
-    { time: '00:00', command: '*FW?#', count: 0, replyTime: '00:40', reply: '-', replyCount: 0 },
-    { time: '00:10', command: '*SN?#', count: 0, replyTime: '—', reply: '-', replyCount: 0 },
-    { time: '00:20', command: '*V::1:1#', count: 0, replyTime: '—', reply: '-', replyCount: 0 },
-    { time: '00:30', command: '*V::2:1#', count: 0, replyTime: '—', reply: '-', replyCount: 0 },
+    { time: '00:00', command: '*FW?#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
+    { time: '00:00', command: '*SN?#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
+    { time: '00:00', command: '*V::1:1#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
+    { time: '00:00', command: '*V::2:1#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
+    { time: '00:00', command: '*V::3:1#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
+    { time: '00:00', command: '*V::4:1#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
+    { time: '00:00', command: '*V::5:1#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
+    { time: '00:00', command: '*V::6:1#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
+    { time: '00:00', command: '*V::7:1#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
   ]);
   const [isConnected, setIsConnected] = useState(false);
   const [ws, setWs] = useState(null);
+  const [connectivity, setConnectivity] = useState('TCP');
 
   const connectWebSocket = () => {
     const websocket = new WebSocket('ws://snackboss-iot.in:6060');
@@ -20,6 +26,7 @@ export default function TestLayout() {
     websocket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
+        console.log(data);
         setTableRows(prev => prev.map(row => row.command === data.command ? { ...row, reply: data.reply, replyCount: row.replyCount + 1 } : row));
       } catch (e) {
         console.error('Invalid message', e);
