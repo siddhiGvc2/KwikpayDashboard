@@ -18,6 +18,9 @@ export default function TestLayout() {
   const [connectivity, setConnectivity] = useState('MQTT');
   const [deviceId, setDeviceId] = useState('');
   const [devices, setDevices] = useState([]);
+  const [time, setTime] = useState(5);
+  const [intervalId, setIntervalId] = useState(null);
+  const [currentCommandIndex, setCurrentCommandIndex] = useState(0);
 
 
 
@@ -42,19 +45,29 @@ export default function TestLayout() {
   }, [connectivity]);
 
   const connectWebSocket = async () => {
-    if (connectivity === 'MQTT') {
-     
-
+    if (connectivity === 'MQTT' && deviceId && time >= 5 && time <= 99) {
       const websocket = new WebSocket('ws://snackboss-iot.in:6060');
       websocket.onopen = () => {
         console.log('WebSocket connected');
         setIsConnected(true);
+        // Start sending commands at intervals
+        const id = setInterval(() => {
+          setCurrentCommandIndex(prev => {
+            const nextIndex = prev % tableRows.length;
+            const command = tableRows[nextIndex].command;
+            const message = JSON.stringify({ topic: `GVC/KP/${deviceId}`, command });
+            websocket.send(message);
+            setTableRows(prevRows => prevRows.map((row, idx) => idx === nextIndex ? { ...row, count: row.count + 1, time: new Date().toLocaleTimeString() } : row));
+            return nextIndex + 1;
+          });
+        }, time * 1000);
+        setIntervalId(id);
       };
       websocket.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
           console.log(data);
-          setTableRows(prev => prev.map(row => row.command === data.command ? { ...row, reply: data.reply, replyCount: row.replyCount + 1 } : row));
+          setTableRows(prev => prev.map(row => row.command === data.command ? { ...row, reply: data.reply, replyCount: row.replyCount + 1, replyTime: new Date().toLocaleTimeString() } : row));
         } catch (e) {
           console.error('Invalid message', e);
         }
@@ -65,10 +78,14 @@ export default function TestLayout() {
       websocket.onclose = () => {
         console.log('WebSocket disconnected');
         setIsConnected(false);
+        if (intervalId) {
+          clearInterval(intervalId);
+          setIntervalId(null);
+        }
       };
       setWs(websocket);
     } else {
-      console.log('WebSocket connection only available for MQTT connectivity');
+      console.log('WebSocket connection requires MQTT connectivity, selected deviceId, and valid time (5-99)');
     }
   };
 
@@ -102,7 +119,7 @@ export default function TestLayout() {
     <div className="container">
 
       <div className="top-buttons">
-        <button className="start" onClick={connectWebSocket} disabled={isConnected}>START</button>
+        <button className="start" onClick={connectWebSocket} disabled={isConnected || connectivity !== 'MQTT' || !deviceId || time < 5 || time > 99}>START</button>
         <button className="stop" onClick={disconnectWebSocket} disabled={!isConnected}>STOP</button>
         <button className="reset" onClick={resetTable}>RESET</button>
       </div>
