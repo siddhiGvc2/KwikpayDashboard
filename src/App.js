@@ -15,31 +15,54 @@ export default function TestLayout() {
   ]);
   const [isConnected, setIsConnected] = useState(false);
   const [ws, setWs] = useState(null);
-  const [connectivity, setConnectivity] = useState('TCP');
+  const [connectivity, setConnectivity] = useState('MQTT');
 
-  const connectWebSocket = () => {
-    const websocket = new WebSocket('ws://snackboss-iot.in:6060');
-    websocket.onopen = () => {
-      console.log('WebSocket connected');
-      setIsConnected(true);
-    };
-    websocket.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        console.log(data);
-        setTableRows(prev => prev.map(row => row.command === data.command ? { ...row, reply: data.reply, replyCount: row.replyCount + 1 } : row));
-      } catch (e) {
-        console.error('Invalid message', e);
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (connectivity === 'MQTT') {
+        try {
+          const response = await fetch('http://snackboss-iot.in:8080/mqtt/getAllMacAddress');
+          const data = await response.json();
+          console.log('Fetched MAC addresses:', data);
+        } catch (error) {
+          console.error('Error fetching MAC addresses:', error);
+        }
       }
     };
-    websocket.onerror = (error) => {
-      console.error('WebSocket error', error);
-    };
-    websocket.onclose = () => {
-      console.log('WebSocket disconnected');
-      setIsConnected(false);
-    };
-    setWs(websocket);
+    fetchData();
+  }, [connectivity]);
+
+  const connectWebSocket = async () => {
+    if (connectivity === 'MQTT') {
+     
+
+      const websocket = new WebSocket('ws://snackboss-iot.in:6060');
+      websocket.onopen = () => {
+        console.log('WebSocket connected');
+        setIsConnected(true);
+      };
+      websocket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          console.log(data);
+          setTableRows(prev => prev.map(row => row.command === data.command ? { ...row, reply: data.reply, replyCount: row.replyCount + 1 } : row));
+        } catch (e) {
+          console.error('Invalid message', e);
+        }
+      };
+      websocket.onerror = (error) => {
+        console.error('WebSocket error', error);
+      };
+      websocket.onclose = () => {
+        console.log('WebSocket disconnected');
+        setIsConnected(false);
+      };
+      setWs(websocket);
+    } else {
+      console.log('WebSocket connection only available for MQTT connectivity');
+    }
   };
 
   const disconnectWebSocket = () => {
@@ -51,10 +74,15 @@ export default function TestLayout() {
 
   const resetTable = () => {
     setTableRows([
-      { time: '00:00', command: '*FW?#', count: 0, replyTime: '00:40', reply: '-', replyCount: 0 },
-      { time: '00:10', command: '*SN?#', count: 0, replyTime: '—', reply: '-', replyCount: 0 },
-      { time: '00:20', command: '*V::1:1#', count: 0, replyTime: '—', reply: '-', replyCount: 0 },
-      { time: '00:30', command: '*V::2:1#', count: 0, replyTime: '—', reply: '-', replyCount: 0 },
+      { time: '00:00', command: '*FW?#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
+      { time: '00:00', command: '*SN?#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
+      { time: '00:00', command: '*V::1:1#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
+      { time: '00:00', command: '*V::2:1#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
+      { time: '00:00', command: '*V::3:1#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
+      { time: '00:00', command: '*V::4:1#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
+      { time: '00:00', command: '*V::5:1#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
+      { time: '00:00', command: '*V::6:1#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
+      { time: '00:00', command: '*V::7:1#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
     ]);
   };
 
@@ -76,10 +104,10 @@ export default function TestLayout() {
         <div className="input-group">
           <label>Connectivity</label>
           <select>
-            <option>MQTT</option>
-            <option>TCP</option>
-            <option>UART</option>
-            <option>BLE</option>
+            <option value="MQTT">MQTT</option>
+            <option value="TCP">TCP</option>
+            <option value="UART">UART</option>
+            <option value="BLE">BLE</option>
           </select>
         </div>
 
