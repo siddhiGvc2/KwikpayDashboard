@@ -1,72 +1,93 @@
-import logo from './logo.svg';
-import './App.css';
-import { useState } from 'react';
+import React from "react";
+import "./App.css";
 
-function App() {
-  const [commandTime1, setCommandTime1] = useState('10:00 AM');
-  const [commandTime2, setCommandTime2] = useState('11:00 AM');
-  const [commandTime3, setCommandTime3] = useState('12:00 PM');
-  const [commandTime4, setCommandTime4] = useState('1:00 PM');
-  const [commandTime5, setCommandTime5] = useState('2:00 PM');
-  
+export default function TestLayout() {
   return (
-    <div className="App">
-      <table style={{ borderCollapse: 'collapse', width: '100%', margin: '20px 0' }}>
-        <thead>
-          <tr>
-            <th style={{ border: '1px solid #ddd', padding: '8px', backgroundColor: '#f2f2f2' }}>TIME</th>
-            <th style={{ border: '1px solid #ddd', padding: '8px', backgroundColor: '#f2f2f2' }}>COMMAND</th>
-            <th style={{ border: '1px solid #ddd', padding: '8px', backgroundColor: '#f2f2f2' }}>COUNT</th>
-            <th style={{ border: '1px solid #ddd', padding: '8px', backgroundColor: '#f2f2f2' }}>TIME</th>
-            <th style={{ border: '1px solid #ddd', padding: '8px', backgroundColor: '#f2f2f2' }}>REPLY</th>
-            <th style={{ border: '1px solid #ddd', padding: '8px', backgroundColor: '#f2f2f2' }}>COUNT</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td style={{ border: '1px solid #ddd', padding: '8px' }}>1</td>
-            <td style={{ border: '1px solid #ddd', padding: '8px' }}>John Doe</td>
-            <td style={{ border: '1px solid #ddd', padding: '8px' }}>25</td>
-            <td style={{ border: '1px solid #ddd', padding: '8px' }}>New York</td>
-            <td style={{ border: '1px solid #ddd', padding: '8px' }}>john@example.com</td>
-            <td style={{ border: '1px solid #ddd', padding: '8px' }}>Active</td>
-          </tr>
-          <tr>
-            <td style={{ border: '1px solid #ddd', padding: '8px' }}>2</td>
-            <td style={{ border: '1px solid #ddd', padding: '8px' }}>Jane Smith</td>
-            <td style={{ border: '1px solid #ddd', padding: '8px' }}>30</td>
-            <td style={{ border: '1px solid #ddd', padding: '8px' }}>Los Angeles</td>
-            <td style={{ border: '1px solid #ddd', padding: '8px' }}>jane@example.com</td>
-            <td style={{ border: '1px solid #ddd', padding: '8px' }}>Inactive</td>
-          </tr>
-          <tr>
-            <td style={{ border: '1px solid #ddd', padding: '8px' }}>3</td>
-            <td style={{ border: '1px solid #ddd', padding: '8px' }}>Bob Johnson</td>
-            <td style={{ border: '1px solid #ddd', padding: '8px' }}>35</td>
-            <td style={{ border: '1px solid #ddd', padding: '8px' }}>Chicago</td>
-            <td style={{ border: '1px solid #ddd', padding: '8px' }}>bob@example.com</td>
-            <td style={{ border: '1px solid #ddd', padding: '8px' }}>Active</td>
-          </tr>
-          <tr>
-            <td style={{ border: '1px solid #ddd', padding: '8px' }}>4</td>
-            <td style={{ border: '1px solid #ddd', padding: '8px' }}>Alice Brown</td>
-            <td style={{ border: '1px solid #ddd', padding: '8px' }}>28</td>
-            <td style={{ border: '1px solid #ddd', padding: '8px' }}>Houston</td>
-            <td style={{ border: '1px solid #ddd', padding: '8px' }}>alice@example.com</td>
-            <td style={{ border: '1px solid #ddd', padding: '8px' }}>Active</td>
-          </tr>
-          <tr>
-            <td style={{ border: '1px solid #ddd', padding: '8px' }}>5</td>
-            <td style={{ border: '1px solid #ddd', padding: '8px' }}>Charlie Wilson</td>
-            <td style={{ border: '1px solid #ddd', padding: '8px' }}>40</td>
-            <td style={{ border: '1px solid #ddd', padding: '8px' }}>Phoenix</td>
-            <td style={{ border: '1px solid #ddd', padding: '8px' }}>charlie@example.com</td>
-            <td style={{ border: '1px solid #ddd', padding: '8px' }}>Inactive</td>
-          </tr>
-        </tbody>
-      </table>
+    <div className="container">
+
+      <div className="top-buttons">
+        <button className="start">START</button>
+        <button className="stop">STOP</button>
+        <button className="reset">RESET</button>
+      </div>
+
+      <div className="row-3">
+        <div className="input-group">
+          <label>Connectivity</label>
+          <select>
+            <option>TCP</option>
+            <option>MQTT</option>
+            <option>UART</option>
+            <option>BLE</option>
+          </select>
+        </div>
+
+        <div className="input-group">
+          <label>Device ID (Only if server)</label>
+          <input type="text" placeholder="Enter Device ID" />
+        </div>
+
+        <div className="input-group">
+          <label>Time: 5–99</label>
+          <input type="number" />
+        </div>
+      </div>
+
+      {/* TABLE HEADER with 6 columns */}
+      <div className="table-header">
+        <div>Time</div>
+        <div>Command</div>
+        <div>Count</div>
+        <div>Time</div>
+        <div>Reply</div>
+        <div>Count</div>
+      </div>
+
+      {/* ROW 1 */}
+      <div className="table-row">
+        <div>00:00</div>
+        <div>*FW?#</div>
+        <div>0</div>
+        <div>00:40</div>
+        <div>-</div>
+        <div>0</div>
+      </div>
+
+      {/* ROW 2 */}
+      <div className="table-row">
+        <div>00:10</div>
+        <div>*SN?#</div>
+        <div>0</div>
+        <div>—</div>
+        <div>-</div>
+        <div>0</div>
+      </div>
+
+      {/* ROW 3 */}
+      <div className="table-row">
+        <div>00:20</div>
+        <div>*V::1:1#</div>
+        <div>0</div>
+        <div>—</div>
+        <div>-</div>
+        <div>0</div>
+      </div>
+
+      {/* ROW 4 */}
+      <div className="table-row">
+        <div>00:30</div>
+        <div>*V::2:1#</div>
+        <div>0</div>
+        <div>—</div>
+        <div>-</div>
+        <div>0</div>
+      </div>
+
+      <div className="footer-box">
+        <h2>TC-D</h2>
+        <p>XXX</p>
+      </div>
+
     </div>
   );
 }
-
-export default App;

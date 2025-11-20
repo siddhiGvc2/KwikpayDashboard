@@ -1,38 +1,90 @@
-.App {
-  text-align: center;
+.container {
+  width: 900px;
+  margin: auto;
+  margin-top: 70px;
+  padding: 20px;
+  background: #f3f3f3;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-family: Arial, sans-serif;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+/* Buttons */
+.top-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.start {
+  background: green;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.stop {
+  background: red;
+}
+
+.reset {
+  background: gray;
+}
+
+.top-buttons button {
+  padding: 8px 16px;
+  border: none;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Inputs Row */
+.row-3 {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.input-group {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  width: 30%;
 }
 
-.App-link {
-  color: #61dafb;
+.input-group input,
+.input-group select {
+  padding: 6px;
+  margin-top: 4px;
+  border: 1px solid #bbb;
+  border-radius: 4px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* TABLE with 6 columns */
+.table-header {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  background: #ddd;
+  padding: 10px;
+  font-weight: bold;
+  border-radius: 4px;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  background: white;
+}
+
+.table-row:nth-child(even) {
+  background: #f9f9f9;
+}
+
+/* Footer */
+.footer-box {
+  margin-top: 30px;
+  padding: 20px;
+  text-align: center;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #ccc;
 }
