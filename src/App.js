@@ -53,9 +53,17 @@ export default function TestLayout() {
         // Start sending commands at intervals
         const id = setInterval(() => {
           const nextIndex = commandIndexRef.current % tableRows.length;
-          const command = tableRows[nextIndex].command;
+          let command = tableRows[nextIndex].command;
+          if (command.startsWith('*V::') && command.endsWith(':1#')) {
+            const match = command.match(/^\*V::(\d+):1#$/);
+            if (match) {
+              const randomNum = Math.floor(Math.random() * 100);
+              command = `*V:${randomNum}:${match[1]}:1#`;
+            }
+          }
           const message = JSON.stringify({ topic: `GVC/KP/${deviceId}`, value:command });
           websocket.send(message);
+          console.log(message);
           setTableRows(prevRows => prevRows.map((row, idx) => idx === nextIndex ? { ...row, count: row.count + 1, time: new Date().toLocaleTimeString() } : row));
           commandIndexRef.current = nextIndex + 1;
         }, time * 1000);
@@ -92,6 +100,10 @@ export default function TestLayout() {
     if (ws) {
       ws.close();
       setWs(null);
+    }
+    if (intervalId) {
+      clearInterval(intervalId);
+      setIntervalId(null);
     }
   };
 
@@ -145,9 +157,14 @@ export default function TestLayout() {
 
         <div className="input-group">
           <label>Time: 5–99</label>
-          <input type="number" />
+          <input type="number" value={time} onChange={(e) => setTime(Number(e.target.value))} min="5" max="99" />
         </div>
       </div>
+       <div className="footer-box">
+        <h2>TC-D</h2>
+        <p>XXX</p>
+      </div>
+
 
       {/* TABLE HEADER with 6 columns */}
       <div className="table-header">
@@ -158,6 +175,7 @@ export default function TestLayout() {
         <div>Reply</div>
         <div>Count</div>
       </div>
+      
 
       {tableRows.map((row, index) => (
         <div key={index} className="table-row">
@@ -170,11 +188,7 @@ export default function TestLayout() {
         </div>
       ))}
 
-      <div className="footer-box">
-        <h2>TC-D</h2>
-        <p>XXX</p>
-      </div>
-
+     
     </div>
   );
 }
