@@ -1,3 +1,6 @@
-# TODO: Add Table UI to React App
+# TODO: Add WebSocket Connection
 
-- [x] Update src/App.js to include a table with 6 columns and 6 rows (1 header + 5 data rows) with sample data.
+- [x] Add WebSocket connection to ws://snackboss-iot.in:6060 in src/App.js
+- [x] Use useState for table rows and WebSocket instance
+- [x] Handle START, STOP, RESET buttons for WS control
+- [x] Update table rows on WebSocket messages
