@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
 
 export default function TestLayout() {
@@ -20,7 +20,7 @@ export default function TestLayout() {
   const [devices, setDevices] = useState([]);
   const [time, setTime] = useState(5);
   const [intervalId, setIntervalId] = useState(null);
-  const [currentCommandIndex, setCurrentCommandIndex] = useState(0);
+  const commandIndexRef = useRef(0);
 
 
 
@@ -52,14 +52,12 @@ export default function TestLayout() {
         setIsConnected(true);
         // Start sending commands at intervals
         const id = setInterval(() => {
-          setCurrentCommandIndex(prev => {
-            const nextIndex = prev % tableRows.length;
-            const command = tableRows[nextIndex].command;
-            const message = JSON.stringify({ topic: `GVC/KP/${deviceId}`, command });
-            websocket.send(message);
-            setTableRows(prevRows => prevRows.map((row, idx) => idx === nextIndex ? { ...row, count: row.count + 1, time: new Date().toLocaleTimeString() } : row));
-            return nextIndex + 1;
-          });
+          const nextIndex = commandIndexRef.current % tableRows.length;
+          const command = tableRows[nextIndex].command;
+          const message = JSON.stringify({ topic: `GVC/KP/${deviceId}`, value:command });
+          websocket.send(message);
+          setTableRows(prevRows => prevRows.map((row, idx) => idx === nextIndex ? { ...row, count: row.count + 1, time: new Date().toLocaleTimeString() } : row));
+          commandIndexRef.current = nextIndex + 1;
         }, time * 1000);
         setIntervalId(id);
       };
@@ -82,6 +80,7 @@ export default function TestLayout() {
           clearInterval(intervalId);
           setIntervalId(null);
         }
+        commandIndexRef.current = 0;
       };
       setWs(websocket);
     } else {
