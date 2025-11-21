@@ -199,7 +199,7 @@ export default function TestLayout() {
 
         <div className="input-group">
           <label>Device ID (Only if server)</label>
-          <input value={deviceId.substring(9)} onChange={(e) => setDeviceId(`NA-1507-${e.target.value}`)}/>
+          <input value={deviceId} onChange={(e) => setDeviceId(e.target.value)}/>
           {/* <select value={deviceId} onChange={(e) => setDeviceId(e.target.value)}>
             {devices.map((device, index) => (
               <option key={index} value={device.SNoutput}>{device.SNoutput}</option>
