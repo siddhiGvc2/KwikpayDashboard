@@ -26,6 +26,9 @@ export default function TestLayout() {
   const [time, setTime] = useState(5);
   const [intervalId, setIntervalId] = useState(null);
   const commandIndexRef = useRef(0);
+  const [bleDevice, setBleDevice] = useState(null);
+  const [bleServer, setBleServer] = useState(null);
+  const [bleCharacteristic, setBleCharacteristic] = useState(null);
 
 
 
@@ -49,8 +52,26 @@ export default function TestLayout() {
     fetchData();
   }, [connectivity]);
 
+  const handleStart = () => {
+    if (connectivity === 'MQTT') {
+      connectWebSocket();
+    } else if (connectivity === 'BLE') {
+      connectBLE();
+    } else {
+      console.log('Connectivity type not supported yet');
+    }
+  };
+
+  const handleStop = () => {
+    if (connectivity === 'MQTT') {
+      disconnectWebSocket();
+    } else if (connectivity === 'BLE') {
+      disconnectBLE();
+    }
+  };
+
   const connectWebSocket = async () => {
-  
+
     if (connectivity === 'MQTT' && deviceId && time >= 5 && time <= 99) {
       const websocket = new WebSocket('ws://snackboss-iot.in:6060');
       websocket.onopen = () => {
@@ -187,6 +208,125 @@ export default function TestLayout() {
     }
   };
 
+  const connectBLE = async () => {
+    if (!navigator.bluetooth) {
+      console.error('Web Bluetooth API not supported');
+      return;
+    }
+    try {
+      const device = await navigator.bluetooth.requestDevice({
+        acceptAllDevices: true,
+      });
+      setBleDevice(device);
+      const server = await device.gatt.connect();
+      setBleServer(server);
+      const services = await server.getPrimaryServices();
+      let selectedCharacteristic = null;
+      for (const service of services) {
+        const characteristics = await service.getCharacteristics();
+        for (const char of characteristics) {
+          if (char.properties.write && char.properties.notify) {
+            selectedCharacteristic = char;
+            break;
+          }
+        }
+        if (selectedCharacteristic) break;
+      }
+      if (!selectedCharacteristic) {
+        console.error('No suitable characteristic found');
+        return;
+      }
+      setBleCharacteristic(selectedCharacteristic);
+      await selectedCharacteristic.startNotifications();
+      selectedCharacteristic.addEventListener('characteristicvaluechanged', handleBleMessage);
+      setIsConnected(true);
+      // Start sending commands at intervals
+      const id = setInterval(() => {
+        const nextIndex = commandIndexRef.current % tableRows.length;
+        let command = tableRows[nextIndex].command;
+        if (command.startsWith('*V::') && command.endsWith(':1#')) {
+          const match = command.match(/^\*V::(\d+):1#$/);
+          if (match) {
+            const randomNum = Math.floor(Math.random() * 100);
+            command = `*V:${randomNum}:${match[1]}:1#`;
+          }
+        }
+        const encoder = new TextEncoder();
+        const data = encoder.encode(command);
+        selectedCharacteristic.writeValue(data);
+        console.log('Sent BLE command:', command);
+        setTableRows(prevRows => prevRows.map((row, idx) => idx === nextIndex ? { ...row, count: row.count + 1, time: new Date().toLocaleTimeString() } : row));
+        commandIndexRef.current = nextIndex + 1;
+      }, time * 1000);
+      setIntervalId(id);
+    } catch (error) {
+      console.error('BLE connection error:', error);
+    }
+  };
+
+  const handleBleMessage = (event) => {
+    const value = event.target.value;
+    const decoder = new TextDecoder();
+    const replyStr = decoder.decode(value);
+    console.log('BLE reply:', replyStr);
+    if (replyStr.includes('Kwikpay')) {
+      const parts = replyStr.split(',');
+      const reply = parts.slice(1).join(',');
+      setTableRows(prev => prev.map(row => row.command === '*FW?#' ? { ...row, reply: reply, replyCount: row.replyCount + 1, replyTime: new Date().toLocaleTimeString() } : row));
+    } else if (replyStr.includes('*SN')) {
+      const parts = replyStr.split(',');
+      const reply = parts[0].substring(1);
+      setTableRows(prev => prev.map(row => row.command === '*SN?#' ? { ...row, reply: reply, replyCount: row.replyCount + 1, replyTime: new Date().toLocaleTimeString() } : row));
+    } else if (replyStr.includes('*V-OK')) {
+      const parts = replyStr.split(',');
+      const reply = parts.slice(1).join(',');
+      const replyParts = reply.split(',');
+      const channel = replyParts[2];
+      const commandToMatch = `*V::${channel}:1#`;
+      setTableRows(prev => prev.map(row => row.command === commandToMatch ? { ...row, reply: reply, replyCount: row.replyCount + 1, replyTime: new Date().toLocaleTimeString() } : row));
+    } else if (replyStr.includes('*T-OK')) {
+      const parts = replyStr.split(',');
+      const reply = parts.slice(1).join(',');
+      const replyParts = reply.split(',');
+      const channel = replyParts[2];
+      const commandToMatch = `*V::${channel}:1#`;
+      setTableRows(prev => prev.map(row => row.command === commandToMatch ? { ...row, reply: reply, replyCount: row.replyCount, replyTime: new Date().toLocaleTimeString() } : row));
+    } else if (replyStr.includes('*TC-D')) {
+      const parts = replyStr.split(',');
+      const reply = parts.slice(1).join(',');
+      setTcResponse(prev => ({ ...prev, time: new Date().toLocaleTimeString(), count: prev.count + 1, reply: reply }));
+    } else if (replyStr.includes('*HBT')) {
+      const parts = replyStr.split(',');
+      const reply = parts.slice(1).join(',');
+      setHBTResponse(prev => ({ ...prev, time: new Date().toLocaleTimeString(), count: prev.count + 1, reply: reply }));
+    } else if (replyStr.includes('*RSSI')) {
+      setTableRows(prev => prev.map(row => row.command === '*RSSI?#' ? { ...row, reply: replyStr, replyCount: row.replyCount + 1, replyTime: new Date().toLocaleTimeString() } : row));
+    } else {
+      setTableRows(prev => prev.map(row => row.command === replyStr ? { ...row, reply: replyStr, replyCount: row.replyCount + 1, replyTime: new Date().toLocaleTimeString() } : row));
+    }
+  };
+
+  const disconnectBLE = () => {
+    if (bleCharacteristic) {
+      bleCharacteristic.stopNotifications();
+      bleCharacteristic.removeEventListener('characteristicvaluechanged', handleBleMessage);
+      setBleCharacteristic(null);
+    }
+    if (bleServer) {
+      bleServer.disconnect();
+      setBleServer(null);
+    }
+    if (bleDevice) {
+      setBleDevice(null);
+    }
+    setIsConnected(false);
+    if (intervalId) {
+      clearInterval(intervalId);
+      setIntervalId(null);
+    }
+    commandIndexRef.current = 0;
+  };
+
   const resetTable = () => {
     setTcResponse({time:'00:00',count:0,reply:'-'})
     setHBTResponse({time:'00:00',count:0,reply:'-'})
@@ -208,14 +348,15 @@ export default function TestLayout() {
   useEffect(() => {
     return () => {
       if (ws) ws.close();
+      if (bleServer) bleServer.disconnect();
     };
-  }, [ws]);
+  }, [ws, bleServer]);
   return (
     <div className="container">
 
       <div className="top-buttons">
-        <button className="start" onClick={connectWebSocket} disabled={isConnected || connectivity !== 'MQTT' || !deviceId || time < 5 || time > 99}>START</button>
-        <button className="stop" onClick={disconnectWebSocket} disabled={!isConnected}>STOP</button>
+        <button className="start" onClick={handleStart} disabled={isConnected}>START</button>
+        <button className="stop" onClick={handleStop} disabled={!isConnected}>STOP</button>
         <button className="reset" onClick={resetTable}>RESET</button>
       </div>
 
