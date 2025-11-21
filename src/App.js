@@ -49,6 +49,7 @@ export default function TestLayout() {
   }, [connectivity]);
 
   const connectWebSocket = async () => {
+    setDeviceId(`NA-1507-${deviceId}`);
     if (connectivity === 'MQTT' && deviceId && time >= 5 && time <= 99) {
       const websocket = new WebSocket('ws://snackboss-iot.in:6060');
       websocket.onopen = () => {
