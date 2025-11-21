@@ -1,7 +1,3 @@
-# TODO for Parsing Incoming Message in Kwikpay Dashboard
-
-- [x] Modify WebSocket onmessage handler in src/App.js to parse reply for *FW?# command
-  - [x] Extract deviceId from data.reply (remove leading *, take part before first comma)
-  - [x] Set extracted deviceId in state using setDeviceId
-  - [x] Update table reply for *FW?# to the part after the comma (version info)
-- [x] Ensure other commands' logic remains unchanged
+- [x] Add CSS rule for `.start:disabled` to visually disable the START button when websocket is connected
+- [x] Change START button disabled condition to only `disabled={isConnected}`
+- [x] Test the application to ensure the START button is disabled only when websocket is connected
