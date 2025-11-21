@@ -13,6 +13,8 @@ export default function TestLayout() {
     { time: '00:00', command: '*V::6:1#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
     { time: '00:00', command: '*V::7:1#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
   ]);
+
+  const [tcResponse,setTcResponse]=useState({time:'00:00',count:0,reply:'-'});
   const [isConnected, setIsConnected] = useState(false);
   const [ws, setWs] = useState(null);
   const [connectivity, setConnectivity] = useState('MQTT');
@@ -95,10 +97,8 @@ export default function TestLayout() {
             const deviceIdExtracted = parts[0].substring(1);
             if(deviceIdExtracted == deviceId) {
               const reply = parts.slice(1).join(',');
-              console.log("parts[1]",parts[1]);
-              const replyParts = parts[1].split(',');
-              console.log("replyParts",replyParts);
-              const channel = replyParts[1]; // assuming format *V-OK,value,channel,...
+              const replyParts = reply.split(',');
+              const channel = replyParts[2]; // *V-OK,value,channel,...
               const commandToMatch = `*V::${channel}:1#`;
               setTableRows(prev => prev.map(row => row.command === commandToMatch ? { ...row, reply: reply, replyCount: row.replyCount + 1, replyTime: new Date().toLocaleTimeString() } : row));
             }
@@ -179,11 +179,12 @@ export default function TestLayout() {
 
         <div className="input-group">
           <label>Device ID (Only if server)</label>
-          <select value={deviceId} onChange={(e) => setDeviceId(e.target.value)}>
+          <input  value={deviceId} onChange={(e) => setDeviceId(e.target.value)}/>
+          {/* <select value={deviceId} onChange={(e) => setDeviceId(e.target.value)}>
             {devices.map((device, index) => (
               <option key={index} value={device.SNoutput}>{device.SNoutput}</option>
             ))}
-          </select>
+          </select> */}
         </div>
 
         <div className="input-group">
@@ -193,7 +194,7 @@ export default function TestLayout() {
       </div>
        <div className="footer-box">
         <h2>TC-D</h2>
-        <p>XXX</p>
+        <p>Time:{tcResponse.time} Count:{tcResponse.count} {tcResponse.reply}</p>
       </div>
 
 
