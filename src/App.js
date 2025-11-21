@@ -215,8 +215,10 @@ export default function TestLayout() {
     }
     try {
       const device = await navigator.bluetooth.requestDevice({
-        acceptAllDevices: true,
-        optionalServices: ['*']
+        filters: [{ namePrefix: "ESP" }],
+        optionalServices: [
+          "00001801-0000-1000-8000-00805f9b34fb"
+        ]
       });
       setBleDevice(device);
       const server = await device.gatt.connect();
