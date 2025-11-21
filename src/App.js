@@ -158,6 +158,7 @@ export default function TestLayout() {
   };
 
   const resetTable = () => {
+    setTcResponse({time:'00:00',count:0,reply:'-'})
     setTableRows([
       { time: '00:00', command: '*FW?#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
       { time: '00:00', command: '*SN?#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
@@ -198,7 +199,7 @@ export default function TestLayout() {
 
         <div className="input-group">
           <label>Device ID (Only if server)</label>
-          <input  value={deviceId} onChange={(e) => setDeviceId(e.target.value)}/>
+          <input value={deviceId.substring(9)} onChange={(e) => setDeviceId(`NA-1507-${e.target.value}`)}/>
           {/* <select value={deviceId} onChange={(e) => setDeviceId(e.target.value)}>
             {devices.map((device, index) => (
               <option key={index} value={device.SNoutput}>{device.SNoutput}</option>
