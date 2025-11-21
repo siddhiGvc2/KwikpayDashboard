@@ -15,6 +15,8 @@ export default function TestLayout() {
   ]);
 
   const [tcResponse,setTcResponse]=useState({time:'00:00',count:0,reply:'-'});
+  const [hbtResponse,setHBTResponse]=useState({time:'00:00',count:0,reply:'-'});
+  const [rssiResponse,setRSSIResponse]=useState({time:'00:00',count:0,reply:'-'});
   const [isConnected, setIsConnected] = useState(false);
   const [ws, setWs] = useState(null);
   const [connectivity, setConnectivity] = useState('MQTT');
@@ -121,7 +123,23 @@ export default function TestLayout() {
               const reply = parts.slice(1).join(',');
               setTcResponse(prev => ({ ...prev, time: new Date().toLocaleTimeString(), count: prev.count + 1 ,reply:reply}));
             }
-          } else {
+          }else if (data.value && data.value.includes('*HBT')) {
+            const replyStr = data.value;
+            const parts = replyStr.split(',');
+            const deviceIdExtracted = parts[0].substring(1);
+            if(deviceIdExtracted == deviceId) {
+              const reply = parts.slice(1).join(',');
+              setHBTResponse(prev => ({ ...prev, time: new Date().toLocaleTimeString(), count: prev.count + 1 ,reply:reply}));
+            }
+          } else if (data.value && data.value.includes('*RSSI')) {
+            const replyStr = data.value;
+            const parts = replyStr.split(',');
+            const deviceIdExtracted = parts[0].substring(1);
+            if(deviceIdExtracted == deviceId) {
+              const reply = parts.slice(1).join(',');
+              setRSSIResponse(prev => ({ ...prev, time: new Date().toLocaleTimeString(), count: prev.count + 1 ,reply:reply}));
+            }
+          }else {
             setTableRows(prev => prev.map(row => row.command === data.command ? { ...row, reply: data.reply, replyCount: row.replyCount + 1, replyTime: new Date().toLocaleTimeString() } : row));
           }
         } catch (e) {
@@ -213,8 +231,18 @@ export default function TestLayout() {
         </div>
       </div>
        <div className="footer-box">
+        <div>
         <h2>TC-D</h2>
         <p>Time:{tcResponse.time} Count:{tcResponse.count} {tcResponse.reply}</p>
+        </div>
+         <div>
+        <h2>HBT</h2>
+        <p>Time:{hbtResponse.time} Count:{hbtResponse.count} {hbtResponse.reply}</p>
+        </div>
+         <div>
+        <h2>RSSI</h2>
+        <p>Time:{rssiResponse.time} Count:{rssiResponse.count} {rssiResponse.reply}</p>
+        </div>
       </div>
 
 

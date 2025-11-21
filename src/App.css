@@ -87,4 +87,6 @@
   background: white;
   border-radius: 8px;
   border: 1px solid #ccc;
+  display: flex;
+  justify-content: space-around;
 }
