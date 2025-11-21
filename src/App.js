@@ -77,10 +77,30 @@ export default function TestLayout() {
             const replyStr = data.value;
             const parts = replyStr.split(',');
             const deviceIdExtracted = parts[0].substring(1);
-            if(deviceIdExtracted== deviceId)
-            {
-            const reply = parts.slice(1).join(',');
-            setTableRows(prev => prev.map(row => row.command === '*FW?#' ? { ...row, reply: reply, replyCount: row.replyCount + 1, replyTime: new Date().toLocaleTimeString() } : row));
+            if(deviceIdExtracted == deviceId) {
+              const reply = parts.slice(1).join(',');
+              setTableRows(prev => prev.map(row => row.command === '*FW?#' ? { ...row, reply: reply, replyCount: row.replyCount + 1, replyTime: new Date().toLocaleTimeString() } : row));
+            }
+          } else if (data.value && data.value.includes('*SN')) {
+            const replyStr = data.value;
+            const parts = replyStr.split(',');
+            const deviceIdExtracted = parts[0].substring(1);
+            if(deviceIdExtracted == deviceId) {
+              const reply = deviceIdExtracted;
+              setTableRows(prev => prev.map(row => row.command === '*SN?#' ? { ...row, reply: reply, replyCount: row.replyCount + 1, replyTime: new Date().toLocaleTimeString() } : row));
+            }
+          } else if (data.value && data.value.includes('*V-OK')) {
+            const replyStr = data.value;
+            const parts = replyStr.split(',');
+            const deviceIdExtracted = parts[0].substring(1);
+            if(deviceIdExtracted == deviceId) {
+              const reply = parts.slice(1).join(',');
+              console.log("parts[1]",parts[1]);
+              const replyParts = parts[1].split(',');
+              console.log("replyParts",replyParts);
+              const channel = replyParts[1]; // assuming format *V-OK,value,channel,...
+              const commandToMatch = `*V::${channel}:1#`;
+              setTableRows(prev => prev.map(row => row.command === commandToMatch ? { ...row, reply: reply, replyCount: row.replyCount + 1, replyTime: new Date().toLocaleTimeString() } : row));
             }
           } else {
             setTableRows(prev => prev.map(row => row.command === data.command ? { ...row, reply: data.reply, replyCount: row.replyCount + 1, replyTime: new Date().toLocaleTimeString() } : row));
