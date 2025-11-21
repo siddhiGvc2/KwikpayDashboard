@@ -1,6 +1,7 @@
-# TODO: Add WebSocket Connection
+# TODO for Parsing Incoming Message in Kwikpay Dashboard
 
-- [x] Add WebSocket connection to ws://snackboss-iot.in:6060 in src/App.js
-- [x] Use useState for table rows and WebSocket instance
-- [x] Handle START, STOP, RESET buttons for WS control
-- [x] Update table rows on WebSocket messages
+- [x] Modify WebSocket onmessage handler in src/App.js to parse reply for *FW?# command
+  - [x] Extract deviceId from data.reply (remove leading *, take part before first comma)
+  - [x] Set extracted deviceId in state using setDeviceId
+  - [x] Update table reply for *FW?# to the part after the comma (version info)
+- [x] Ensure other commands' logic remains unchanged

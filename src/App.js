@@ -33,9 +33,9 @@ export default function TestLayout() {
           console.log('Fetched MAC addresses:', data);
           const onlineDevices = data.data.filter(device => device.lastHeartBeatTime && (Date.now() - new Date(device.lastHeartBeatTime).getTime()) < 5 * 60 * 1000); // Online if heartbeat within 5 minutes
           setDevices(onlineDevices);
-          if (onlineDevices.length > 0) {
-            setDeviceId(onlineDevices[0].SNoutput);
-          }
+          // if (onlineDevices.length > 0) {
+          //   setDeviceId(onlineDevices[0].SNoutput);
+          // }
         } catch (error) {
           console.error('Error fetching MAC addresses:', error);
         }
@@ -73,7 +73,18 @@ export default function TestLayout() {
         try {
           const data = JSON.parse(event.data);
           console.log(data);
-          setTableRows(prev => prev.map(row => row.command === data.command ? { ...row, reply: data.reply, replyCount: row.replyCount + 1, replyTime: new Date().toLocaleTimeString() } : row));
+          if (data.value && data.value.includes('Kwikpay')) {
+            const replyStr = data.value;
+            const parts = replyStr.split(',');
+            const deviceIdExtracted = parts[0].substring(1);
+            if(deviceIdExtracted== deviceId)
+            {
+            const reply = parts.slice(1).join(',');
+            setTableRows(prev => prev.map(row => row.command === '*FW?#' ? { ...row, reply: reply, replyCount: row.replyCount + 1, replyTime: new Date().toLocaleTimeString() } : row));
+            }
+          } else {
+            setTableRows(prev => prev.map(row => row.command === data.command ? { ...row, reply: data.reply, replyCount: row.replyCount + 1, replyTime: new Date().toLocaleTimeString() } : row));
+          }
         } catch (e) {
           console.error('Invalid message', e);
         }
