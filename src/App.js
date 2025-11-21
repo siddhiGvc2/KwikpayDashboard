@@ -177,6 +177,8 @@ export default function TestLayout() {
 
   const resetTable = () => {
     setTcResponse({time:'00:00',count:0,reply:'-'})
+    setHBTResponse({time:'00:00',count:0,reply:'-'})
+    setRSSIResponse({time:'00:00',count:0,reply:'-'})
     setTableRows([
       { time: '00:00', command: '*FW?#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
       { time: '00:00', command: '*SN?#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
