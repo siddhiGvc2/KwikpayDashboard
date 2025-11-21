@@ -5,6 +5,7 @@ export default function TestLayout() {
   const [tableRows, setTableRows] = useState([
     { time: '00:00', command: '*FW?#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
     { time: '00:00', command: '*SN?#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
+    { time: '00:00', command: '*RSSI?#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
     { time: '00:00', command: '*V::1:1#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
     { time: '00:00', command: '*V::2:1#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
     { time: '00:00', command: '*V::3:1#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
@@ -16,7 +17,7 @@ export default function TestLayout() {
 
   const [tcResponse,setTcResponse]=useState({time:'00:00',count:0,reply:'-'});
   const [hbtResponse,setHBTResponse]=useState({time:'00:00',count:0,reply:'-'});
-  const [rssiResponse,setRSSIResponse]=useState({time:'00:00',count:0,reply:'-'});
+  
   const [isConnected, setIsConnected] = useState(false);
   const [ws, setWs] = useState(null);
   const [connectivity, setConnectivity] = useState('MQTT');
@@ -49,7 +50,7 @@ export default function TestLayout() {
   }, [connectivity]);
 
   const connectWebSocket = async () => {
-    setDeviceId(`NA-1507-${deviceId}`);
+  
     if (connectivity === 'MQTT' && deviceId && time >= 5 && time <= 99) {
       const websocket = new WebSocket('ws://snackboss-iot.in:6060');
       websocket.onopen = () => {
@@ -66,7 +67,12 @@ export default function TestLayout() {
               command = `*V:${randomNum}:${match[1]}:1#`;
             }
           }
-          const message = JSON.stringify({ topic: `GVC/KP/${deviceId}`, value:command });
+          let DeviceId=deviceId;
+          if(!deviceId.includes('NA-1507-'))
+          {
+            DeviceId=`NA-1507-${deviceId}`
+          }
+          const message = JSON.stringify({ topic: `GVC/KP/${DeviceId}`, value:command });
           websocket.send(message);
           console.log(message);
           setTableRows(prevRows => prevRows.map((row, idx) => idx === nextIndex ? { ...row, count: row.count + 1, time: new Date().toLocaleTimeString() } : row));
@@ -76,13 +82,18 @@ export default function TestLayout() {
       };
       websocket.onmessage = (event) => {
         try {
+          let DeviceId=deviceId;
+          if(!deviceId.includes('NA-1507-'))
+          {
+            DeviceId=`NA-1507-${deviceId}`
+          }
           const data = JSON.parse(event.data);
           console.log(data);
           if (data.value && data.value.includes('Kwikpay')) {
             const replyStr = data.value;
             const parts = replyStr.split(',');
             const deviceIdExtracted = parts[0].substring(1);
-            if(deviceIdExtracted == deviceId) {
+            if(deviceIdExtracted == DeviceId) {
               const reply = parts.slice(1).join(',');
               setTableRows(prev => prev.map(row => row.command === '*FW?#' ? { ...row, reply: reply, replyCount: row.replyCount + 1, replyTime: new Date().toLocaleTimeString() } : row));
             }
@@ -90,7 +101,7 @@ export default function TestLayout() {
             const replyStr = data.value;
             const parts = replyStr.split(',');
             const deviceIdExtracted = parts[0].substring(1);
-            if(deviceIdExtracted == deviceId) {
+            if(deviceIdExtracted == DeviceId) {
               const reply = deviceIdExtracted;
               setTableRows(prev => prev.map(row => row.command === '*SN?#' ? { ...row, reply: reply, replyCount: row.replyCount + 1, replyTime: new Date().toLocaleTimeString() } : row));
             }
@@ -98,7 +109,7 @@ export default function TestLayout() {
             const replyStr = data.value;
             const parts = replyStr.split(',');
             const deviceIdExtracted = parts[0].substring(1);
-            if(deviceIdExtracted == deviceId) {
+            if(deviceIdExtracted == DeviceId) {
               const reply = parts.slice(1).join(',');
               const replyParts = reply.split(',');
               const channel = replyParts[2]; // *V-OK,value,channel,...
@@ -109,7 +120,7 @@ export default function TestLayout() {
             const replyStr = data.value;
             const parts = replyStr.split(',');
             const deviceIdExtracted = parts[0].substring(1);
-            if(deviceIdExtracted == deviceId) {
+            if(deviceIdExtracted == DeviceId) {
               const reply = parts.slice(1).join(',');
               const replyParts = reply.split(',');
               const channel = replyParts[2]; // *V-OK,value,channel,...
@@ -120,7 +131,7 @@ export default function TestLayout() {
             const replyStr = data.value;
             const parts = replyStr.split(',');
             const deviceIdExtracted = parts[0].substring(1);
-            if(deviceIdExtracted == deviceId) {
+            if(deviceIdExtracted == DeviceId) {
               const reply = parts.slice(1).join(',');
               setTcResponse(prev => ({ ...prev, time: new Date().toLocaleTimeString(), count: prev.count + 1 ,reply:reply}));
             }
@@ -128,18 +139,18 @@ export default function TestLayout() {
             const replyStr = data.value;
             const parts = replyStr.split(',');
             const deviceIdExtracted = parts[0].substring(1);
-            if(deviceIdExtracted == deviceId) {
+            if(deviceIdExtracted == DeviceId) {
               const reply = parts.slice(1).join(',');
               setHBTResponse(prev => ({ ...prev, time: new Date().toLocaleTimeString(), count: prev.count + 1 ,reply:reply}));
             }
           } else if (data.value && data.value.includes('*RSSI')) {
-            const replyStr = data.value;
-            const parts = replyStr.split(',');
-            const deviceIdExtracted = parts[0].substring(1);
-            if(deviceIdExtracted == deviceId) {
-              const reply = parts.slice(1).join(',');
-              setRSSIResponse(prev => ({ ...prev, time: new Date().toLocaleTimeString(), count: prev.count + 1 ,reply:reply}));
-            }
+             const replyStr = data.value;
+            
+            // const deviceIdExtracted = parts[0].substring(1);
+            // if(deviceIdExtracted == DeviceId) {
+              // const reply = parts.slice(1).join(',');
+              setTableRows(prev => prev.map(row => row.command === '*RSSI?#' ? { ...row, reply: replyStr, replyCount: row.replyCount + 1, replyTime: new Date().toLocaleTimeString() } : row));
+            // }
           }else {
             setTableRows(prev => prev.map(row => row.command === data.command ? { ...row, reply: data.reply, replyCount: row.replyCount + 1, replyTime: new Date().toLocaleTimeString() } : row));
           }
@@ -179,10 +190,11 @@ export default function TestLayout() {
   const resetTable = () => {
     setTcResponse({time:'00:00',count:0,reply:'-'})
     setHBTResponse({time:'00:00',count:0,reply:'-'})
-    setRSSIResponse({time:'00:00',count:0,reply:'-'})
+    
     setTableRows([
       { time: '00:00', command: '*FW?#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
       { time: '00:00', command: '*SN?#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
+      { time: '00:00', command: '*RSSI?#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
       { time: '00:00', command: '*V::1:1#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
       { time: '00:00', command: '*V::2:1#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
       { time: '00:00', command: '*V::3:1#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
@@ -234,18 +246,15 @@ export default function TestLayout() {
         </div>
       </div>
        <div className="footer-box">
-        <div>
-        <h2>TC-D</h2>
+        <div style={{display:'flex',alignItems:'center'}}>
+        <h2>TC-D : </h2>
         <p>Time:{tcResponse.time} Count:{tcResponse.count} {tcResponse.reply}</p>
         </div>
-         <div>
-        <h2>HBT</h2>
+         <div style={{display:'flex',alignItems:'center'}}>
+        <h2>HBT : </h2>
         <p>Time:{hbtResponse.time} Count:{hbtResponse.count} {hbtResponse.reply}</p>
         </div>
-         <div>
-        <h2>RSSI</h2>
-        <p>Time:{rssiResponse.time} Count:{rssiResponse.count} {rssiResponse.reply}</p>
-        </div>
+        
       </div>
 
 
