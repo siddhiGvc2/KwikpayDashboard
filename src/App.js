@@ -223,7 +223,7 @@ export default function TestLayout() {
       setBleDevice(device);
       const server = await device.gatt.connect();
       setBleServer(server);
-      const services = await server.getPrimaryServices();
+      const services = await server.getPrimaryServices("00001801-0000-1000-8000-00805f9b34fb");
       let selectedCharacteristic = null;
       for (const service of services) {
         const characteristics = await service.getCharacteristics();
