@@ -216,7 +216,7 @@ export default function TestLayout() {
     try {
       const device = await navigator.bluetooth.requestDevice({
         acceptAllDevices: true,
-        optionalServices: ['generic_access', 'generic_attribute']
+        optionalServices: ['*']
       });
       setBleDevice(device);
       const server = await device.gatt.connect();
