@@ -102,6 +102,25 @@ export default function TestLayout() {
               const commandToMatch = `*V::${channel}:1#`;
               setTableRows(prev => prev.map(row => row.command === commandToMatch ? { ...row, reply: reply, replyCount: row.replyCount + 1, replyTime: new Date().toLocaleTimeString() } : row));
             }
+          } else if (data.value && data.value.includes('*T-OK')) {
+            const replyStr = data.value;
+            const parts = replyStr.split(',');
+            const deviceIdExtracted = parts[0].substring(1);
+            if(deviceIdExtracted == deviceId) {
+              const reply = parts.slice(1).join(',');
+              const replyParts = reply.split(',');
+              const channel = replyParts[2]; // *V-OK,value,channel,...
+              const commandToMatch = `*V::${channel}:1#`;
+              setTableRows(prev => prev.map(row => row.command === commandToMatch ? { ...row, reply: reply, replyCount: row.replyCount, replyTime: new Date().toLocaleTimeString() } : row));
+            }
+          } else if (data.value && data.value.includes('*TC-D')) {
+            const replyStr = data.value;
+            const parts = replyStr.split(',');
+            const deviceIdExtracted = parts[0].substring(1);
+            if(deviceIdExtracted == deviceId) {
+              const reply = parts.slice(1).join(',');
+              setTcResponse(prev => ({ ...prev, time: new Date().toLocaleTimeString(), count: prev.count + 1 ,reply:reply}));
+            }
           } else {
             setTableRows(prev => prev.map(row => row.command === data.command ? { ...row, reply: data.reply, replyCount: row.replyCount + 1, replyTime: new Date().toLocaleTimeString() } : row));
           }
@@ -204,7 +223,7 @@ export default function TestLayout() {
         <div>Command</div>
         <div>Count</div>
         <div>Time</div>
-        <div>Reply</div>
+        <div style={{width:'300px'}}>Reply</div>
         <div>Count</div>
       </div>
       
@@ -213,9 +232,9 @@ export default function TestLayout() {
         <div key={index} className="table-row">
           <div>{row.time}</div>
           <div>{row.command}</div>
-          <div>{row.count}</div>
+          <div style={{width:'100px'}}>{row.count}</div>
           <div>{row.replyTime}</div>
-          <div>{row.reply}</div>
+          <div style={{width:'300px'}}>{row.reply}</div>
           <div>{row.replyCount}</div>
         </div>
       ))}
