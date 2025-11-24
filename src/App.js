@@ -17,7 +17,7 @@ export default function TestLayout() {
 
   const [tcResponse,setTcResponse]=useState({time:'00:00',count:0,reply:'-'});
   const [hbtResponse,setHBTResponse]=useState({time:'00:00',count:0,reply:'-'});
-  
+
   const [isConnected, setIsConnected] = useState(false);
   const [ws, setWs] = useState(null);
   const [connectivity, setConnectivity] = useState('MQTT');
@@ -31,7 +31,13 @@ export default function TestLayout() {
   const [bleCharacteristic, setBleCharacteristic] = useState(null);
 
 
+  const OptionAUrl="ws://snackboss-iot.in:1010";
+  const OptionBUrl="ws://snackboss-iot.in:2020";
+  const OptionCUrl="ws://snackboss-iot.in:6060";
 
+  // New state for three select options
+  const [mqttServer, setMqttServer] = useState("A");
+ 
   useEffect(() => {
     const fetchData = async () => {
       if (connectivity === 'MQTT') {
@@ -72,8 +78,22 @@ export default function TestLayout() {
 
   const connectWebSocket = async () => {
 
+    let url='';
+    if(mqttServer=='A')
+    {
+      url=OptionAUrl;
+    }
+    else if(mqttServer=='B')
+    {
+      url=OptionBUrl;
+    }
+    else if(mqttServer=='C')
+    {
+      url=OptionCUrl;
+    }
+
     if (connectivity === 'MQTT' && deviceId && time >= 5 && time <= 99) {
-      const websocket = new WebSocket('ws://snackboss-iot.in:6060');
+      const websocket = new WebSocket(url);
       websocket.onopen = () => {
         console.log('WebSocket connected');
         setIsConnected(true);
@@ -166,12 +186,9 @@ export default function TestLayout() {
             }
           } else if (data.value && data.value.includes('*RSSI')) {
              const replyStr = data.value;
-            
-            // const deviceIdExtracted = parts[0].substring(1);
-            // if(deviceIdExtracted == DeviceId) {
-              // const reply = parts.slice(1).join(',');
+
               setTableRows(prev => prev.map(row => row.command === '*RSSI?#' ? { ...row, reply: replyStr, replyCount: row.replyCount + 1, replyTime: new Date().toLocaleTimeString() } : row));
-            // }
+
           }else {
             setTableRows(prev => prev.map(row => row.command === data.command ? { ...row, reply: data.reply, replyCount: row.replyCount + 1, replyTime: new Date().toLocaleTimeString() } : row));
           }
@@ -333,7 +350,7 @@ export default function TestLayout() {
   const resetTable = () => {
     setTcResponse({time:'00:00',count:0,reply:'-'})
     setHBTResponse({time:'00:00',count:0,reply:'-'})
-    
+
     setTableRows([
       { time: '00:00', command: '*FW?#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
       { time: '00:00', command: '*SN?#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
@@ -354,6 +371,7 @@ export default function TestLayout() {
       if (bleServer) bleServer.disconnect();
     };
   }, [ws, bleServer]);
+
   return (
     <div className="container">
 
@@ -377,30 +395,42 @@ export default function TestLayout() {
         <div className="input-group">
           <label>Device ID (Only if server)</label>
           <input value={deviceId} onChange={(e) => setDeviceId(e.target.value)}/>
-          {/* <select value={deviceId} onChange={(e) => setDeviceId(e.target.value)}>
-            {devices.map((device, index) => (
-              <option key={index} value={device.SNoutput}>{device.SNoutput}</option>
-            ))}
-          </select> */}
         </div>
 
         <div className="input-group">
           <label>Time: 5–99</label>
           <input type="number" value={time} onChange={(e) => setTime(Number(e.target.value))} min="5" max="99" />
         </div>
-      </div>
-       <div className="footer-box">
-        <div style={{display:'flex',alignItems:'center'}}>
-        <h2>TC-D : </h2>
-        <p>Time:{tcResponse.time} Count:{tcResponse.count} {tcResponse.reply}</p>
-        </div>
-         <div style={{display:'flex',alignItems:'center'}}>
-        <h2>HBT : </h2>
-        <p>Time:{hbtResponse.time} Count:{hbtResponse.count} {hbtResponse.reply}</p>
-        </div>
-        
+
+        {connectivity === 'MQTT' && (
+          <>
+            <div className="input-group">
+              <label>Mqtt Servers</label>
+              <select value={mqttServer} onChange={(e) => setMqttServer(e.target.value)}>
+              
+                <option value="A">kwikpayProduction</option>
+                <option value="B">kwikpaySandbox</option>
+                <option value="C">gvcMqttServer</option>
+              </select>
+            </div>
+
+           
+          </>
+        )}
+
       </div>
 
+      <div className="footer-box">
+        <div style={{display:'flex',alignItems:'center'}}>
+          <h2>TC-D : </h2>
+          <p>Time:{tcResponse.time} Count:{tcResponse.count} {tcResponse.reply}</p>
+        </div>
+        <div style={{display:'flex',alignItems:'center'}}>
+          <h2>HBT : </h2>
+          <p>Time:{hbtResponse.time} Count:{hbtResponse.count} {hbtResponse.reply}</p>
+        </div>
+
+      </div>
 
       {/* TABLE HEADER with 6 columns */}
       <div className="table-header">
@@ -411,7 +441,6 @@ export default function TestLayout() {
         <div style={{width:'300px'}}>Reply</div>
         <div>Count</div>
       </div>
-      
 
       {tableRows.map((row, index) => (
         <div key={index} className="table-row">
@@ -424,7 +453,6 @@ export default function TestLayout() {
         </div>
       ))}
 
-     
     </div>
   );
 }
