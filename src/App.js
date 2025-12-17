@@ -3,6 +3,8 @@ import "./App.css";
 
 export default function TestLayout() {
   const [tableRows, setTableRows] = useState([
+    { time: '00:00', command: '*CC#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
+    { time: '00:00', command: '*PT:dashboard:0000:N#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
     { time: '00:00', command: '*FW?#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
     { time: '00:00', command: '*SN?#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
     { time: '00:00', command: '*RSSI?#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
@@ -189,6 +191,16 @@ export default function TestLayout() {
 
               setTableRows(prev => prev.map(row => row.command === '*RSSI?#' ? { ...row, reply: replyStr, replyCount: row.replyCount + 1, replyTime: new Date().toLocaleTimeString() } : row));
 
+          }else if (data.value && data.value.includes('*CC-OK')) {
+             const replyStr = data.value;
+
+              setTableRows(prev => prev.map(row => row.command === '*CC#' ? { ...row, reply: replyStr, replyCount: row.replyCount + 1, replyTime: new Date().toLocaleTimeString() } : row));
+
+          }else if (data.value && data.value.includes('*PT-OK')) {
+             const replyStr = data.value;
+
+              setTableRows(prev => prev.map(row => row.command === '*PT:dashboard:0000:N#' ? { ...row, reply: replyStr, replyCount: row.replyCount + 1, replyTime: new Date().toLocaleTimeString() } : row));
+
           }else {
             setTableRows(prev => prev.map(row => row.command === data.command ? { ...row, reply: data.reply, replyCount: row.replyCount + 1, replyTime: new Date().toLocaleTimeString() } : row));
           }
@@ -352,6 +364,8 @@ export default function TestLayout() {
     setHBTResponse({time:'00:00',count:0,reply:'-'})
 
     setTableRows([
+      { time: '00:00', command: '*CC#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
+      { time: '00:00', command: '*PT:dashboard:0000:N#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
       { time: '00:00', command: '*FW?#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
       { time: '00:00', command: '*SN?#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
       { time: '00:00', command: '*RSSI?#', count: 0, replyTime: '00:00', reply: '-', replyCount: 0 },
