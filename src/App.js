@@ -25,7 +25,7 @@ export default function TestLayout() {
   const [connectivity, setConnectivity] = useState('MQTT');
   const [deviceId, setDeviceId] = useState('');
   const [devices, setDevices] = useState([]);
-  const [time, setTime] = useState(5);
+  const [time, setTime] = useState(3);
   const [intervalId, setIntervalId] = useState(null);
   const commandIndexRef = useRef(0);
   const [bleDevice, setBleDevice] = useState(null);
@@ -94,7 +94,7 @@ export default function TestLayout() {
       url=OptionCUrl;
     }
 
-    if (connectivity === 'MQTT' && deviceId && time >= 5 && time <= 99) {
+    if (connectivity === 'MQTT' && deviceId && time >= 3 && time <= 99) {
       const websocket = new WebSocket(url);
       websocket.onopen = () => {
         console.log('WebSocket connected');
