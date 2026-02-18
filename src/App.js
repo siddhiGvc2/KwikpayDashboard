@@ -33,9 +33,9 @@ export default function TestLayout() {
   const [bleCharacteristic, setBleCharacteristic] = useState(null);
 
 
-  const OptionAUrl="ws://snackboss-iot.in:1010";
-  const OptionBUrl="ws://snackboss-iot.in:2020";
-  const OptionCUrl="ws://snackboss-iot.in:6060";
+  const OptionAUrl="ws://gvcsystems.com:1010";
+  const OptionBUrl="ws://gvcsystems.com:2020";
+  const OptionCUrl="ws://gvcsystems.com:6060";
 
   // New state for three select options
   const [mqttServer, setMqttServer] = useState("A");
